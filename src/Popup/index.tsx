@@ -6,6 +6,8 @@ import {
   PhoneAuthProvider,
   MultiFactorResolver,
   PhoneMultiFactorGenerator,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 import { useState } from "react";
 import { configureCaptcha } from "../configureCapture";
@@ -13,17 +15,27 @@ import { auth } from "../firebase";
 
 const Popup = () => {
   const [mail, setMail] = useState("");
+  const [password, setPassword] = useState("");
   const [vid, setVid] = useState("");
   const [otp, setOTP] = useState("");
   const [resolver, setResolver] = useState<MultiFactorResolver | null>(null);
+
+  // const provider = new GoogleAuthProvider();
 
   const login = async () => {
     const recaptchaVerifier = configureCaptcha();
 
     try {
-      const user = await signInWithEmailAndPassword(auth, mail, "Test0000");
+      console.log("1");
+      const user = await signInWithEmailAndPassword(auth, mail, password);
       console.log("user", user);
+      // const result = await signInWithPopup(auth, provider);
+      // console.log("2");
+      // const credential = GoogleAuthProvider.credentialFromResult(result);
+      // console.log("cred", credential);
     } catch (error: any) {
+      console.log("3");
+      console.log("e", error);
       if (error.code === "auth/multi-factor-auth-required") {
         console.log("err", error.code);
         const multiResolver = getMultiFactorResolver(auth, error);
@@ -39,7 +51,7 @@ const Popup = () => {
           );
           setVid(v);
         } catch (e) {
-          console.log("e", e);
+          console.log("e", e); // internal-error
         }
 
         const res = getMultiFactorResolver(auth, error);
@@ -74,6 +86,12 @@ const Popup = () => {
         label="Email"
         value={mail}
         onChange={(e) => setMail(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
         fullWidth
       />
       <Button onClick={login}>LOGIN</Button>
